@@ -1,0 +1,45 @@
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Timeline Triển khai 2D</title>
+<style>
+body{font-family:Inter, Arial, sans-serif;margin:0;background:#fff;color:#111;padding:20px}
+h2{margin:0 0 12px}
+.timeline{position:relative;margin:20px 0;padding-left:22px}
+.timeline:before{content:'';position:absolute;left:8px;top:0;bottom:0;width:4px;background:#eef2ff;border-radius:2px}
+.item{position:relative;padding:14px 16px;margin-bottom:18px;background:#f8fafc;border-radius:8px;border:1px solid rgba(15,23,42,.03)}
+.item::before{content:'';position:absolute;left:-20px;top:18px;width:12px;height:12px;border-radius:50%;background:var(--accent, #2563eb);box-shadow:0 0 0 4px rgba(37,99,235,.08)}
+.item .date{font-size:13px;color:#374151;margin-bottom:6px}
+.item .title{font-weight:600;margin-bottom:6px}
+.item .desc{font-size:14px;color:#374151;opacity:.9}
+.note{font-size:12px;color:#6b7280;margin-top:8px}
+</style>
+</head>
+<body>
+<h2>Timeline Triển khai 2D</h2>
+<div class="timeline">
+<div class="item">
+<div class="date">01/09/2025 - 07/09/2025</div>
+<div class="title">Chuẩn bị file gốc & thư viện assets</div>
+<div class="desc">Kiểm tra bản vẽ, thu thập texture, symbols và danh mục layer.</div>
+</div>
+<div class="item">
+<div class="date">08/09/2025 - 14/09/2025</div>
+<div class="title">Thiết kế layout 2D cơ bản</div>
+<div class="desc">Bố cục tổng thể, chia khu chức năng, đánh dấu kích thước chính.</div>
+</div>
+<div class="item">
+<div class="date">15/09/2025 - 25/09/2025</div>
+<div class="title">Triển khai chi tiết và kiểm duyệt nội bộ</div>
+<div class="desc">Chi tiết nội thất, ghi chú thi công, kiểm tra chồng chéo và chỉnh sửa.</div>
+</div>
+<div class="item">
+<div class="date">26/09/2025 - 30/09/2025</div>
+<div class="title">Hoàn thiện & xuất hồ sơ</div>
+<div class="desc">Xuất PDF, DWG, và chuẩn hóa tên file theo hợp đồng.</div>
+</div>
+</div>
+<div class="note">Ghi chú: Thời gian trên chỉ là ví dụ — thay đổi theo khối lượng công việc.</div>
+</body>
+</html>
