@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timeline 2D</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      -webkit-user-select: none; /* Safari */
+      -ms-user-select: none; /* IE 10+ */
+      user-select: none; /* Standard syntax */
+    }
+    .sum, .footer-note, label {
+      -webkit-user-select: none; /* Safari */
+      -ms-user-select: none; /* IE 10+ */
+      user-select: none; /* Standard syntax */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Thời Gian Khai Triển 2D</h1>
+    <div class="card">
+      <div class="kpi" style="grid-template-columns: repeat(1, minmax(0, 1fr));">
+        <div class="item">
+          <label>Tổng diện tích</label>
+          <div class="sum" id="totalAreaDisplay">0 m²</div>
+        </div>
+      </div>
+      <div class="kpi" style="grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 12px;">
+        <div class="item small-item">
+          <label>Thời gian Fitout (ngày)</label>
+          <div class="sum" id="fitoutTimeDisplay">0 ngày</div>
+        </div>
+        <div class="item small-item">
+          <label>Thời gian Fur (ngày)</label>
+          <div class="sum" id="furTimeDisplay">0 ngày</div>
+        </div>
+        <div class="item">
+          <label>Thời gian tổng (ngày)</label>
+          <div class="sum" id="totalTimeDisplay">0 ngày</div>
+        </div>
+      </div>
+      <p class="footer-note">Tỉ lệ: Fitout 22m²/ngày, Fur 18m²/ngày.</p>
+    </div>
+  </div>
+
+  <script>
+    let data = {
+      totalArea: 0,
+      buildingType: '',
+      designStyle: '',
+      scopeFitout: false,
+      scopeFur: false,
+      wcCount: 0,
+      staircase: false,
+      bedroomCount: 0
+    };
+
+    function updateCalculations() {
+      const totalArea = data.totalArea;
+
+      let fitoutTime = 0;
+      if (data.scopeFitout) {
+        fitoutTime = totalArea / 22 + data.wcCount * 0.4 + (data.staircase ? 1 : 0);
+      }
+
+      let furTime = 0;
+      if (data.scopeFur) {
+        furTime = totalArea / 18 + data.bedroomCount * 1;
+      }
+
+      const totalTime = (fitoutTime + furTime);
+
+      document.getElementById('totalAreaDisplay').textContent = `${totalArea.toFixed(2)} m²`;
+      document.getElementById('fitoutTimeDisplay').textContent = `${fitoutTime.toFixed(1)} ngày`;
+      document.getElementById('furTimeDisplay').textContent = `${furTime.toFixed(1)} ngày`;
+      document.getElementById('totalTimeDisplay').textContent = `${totalTime.toFixed(1)} ngày`;
+    }
+
+    window.addEventListener('message', (event) => {
+      data = event.data;
+      updateCalculations();
+    });
+
+    updateCalculations();
+  </script>
+</body>
+</html>
