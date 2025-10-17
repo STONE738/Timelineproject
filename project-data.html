@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Data Dự án</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      -webkit-user-select: none; /* Safari */
+      -ms-user-select: none; /* IE 10+ */
+      user-select: none; /* Standard syntax */
+    }
+    .sum, .footer-note, label {
+      -webkit-user-select: none; /* Safari */
+      -ms-user-select: none; /* IE 10+ */
+      user-select: none; /* Standard syntax */
+    }
+    .project-form {
+      background: var(--card);
+      border: 1px solid #1f2937;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .project-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .project-item {
+      background: #0d131a;
+      border: 1px solid #1e293b;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .delete-btn:hover {
+      background: #b91c1c;
+    }
+    button {
+      background: var(--acc);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #16a34a;
+    }
+    .filter {
+      background: #0f1216;
+      border: 1px solid #334155;
+      color: var(--txt);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Quản lý Data Dự án</h1>
+    <div class="card project-form">
+      <h2>Thêm Dự án Mới</h2>
+      <div class="row">
+        <div class="field">
+          <label>Loại công trình</label>
+          <select id="newBuildingType">
+            <option value="canho">Căn hộ</option>
+            <option value="nhapho">Nhà phố</option>
+            <option value="bietthu">Biệt thự</option>
+            <option value="dichvu">Dịch vụ</option>
+            <option value="shophouse">Shophouse</option>
+            <option value="vanphong">Văn phòng</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tên Khách hàng & Mã</label>
+          <input type="text" id="newNameCode" placeholder="VD: Chị Tuyết - PR142">
+        </div>
+        <div class="field">
+          <label>Diện tích (m²)</label>
+          <input type="number" id="newArea" min="1">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Gói HĐTC (triệu VNĐ)</label>
+          <input type="number" id="newContractValue" min="0">
+        </div>
+        <div class="field">
+          <label>Fitout (triệu VNĐ)</label>
+          <input type="number" id="newFitoutCost" min="0">
+        </div>
+        <div class="field">
+          <label>Fur (triệu VNĐ)</label>
+          <input type="number" id="newFurCost" min="0">
+        </div>
+      </div>
+      <button onclick="addProject()">Thêm Dự án</button>
+    </div>
+    <div class="card">
+      <h2>Danh sách Dự án</h2>
+      <select id="filterType" class="filter" onchange="displayProjects()">
+        <option value="">Tất cả</option>
+        <option value="canho">Căn hộ</option>
+        <option value="nhapho">Nhà phố</option>
+        <option value="bietthu">Biệt thự</option>
+        <option value="dichvu">Dịch vụ</option>
+        <option value="shophouse">Shophouse</option>
+        <option value="vanphong">Văn phòng</option>
+      </select>
+      <div class="project-list" id="projectList"></div>
+      <button onclick="exportData()">Export JSON</button>
+    </div>
+  </div>
+
+  <script>
+    let projects = JSON.parse(localStorage.getItem('projects')) || {
+      'canho': [],
+      'nhapho': [],
+      'bietthu': [],
+      'dichvu': [],
+      'shophouse': [],
+      'vanphong': []
+    };
+
+    function addProject() {
+      const buildingType = document.getElementById('newBuildingType').value;
+      const nameCode = document.getElementById('newNameCode').value;
+      const area = parseFloat(document.getElementById('newArea').value) || 0;
+      const contractValue = parseFloat(document.getElementById('newContractValue').value) || 0;
+      const fitoutCost = parseFloat(document.getElementById('newFitoutCost').value) || 0;
+      const furCost = parseFloat(document.getElementById('newFurCost').value) || 0;
+
+      if (!buildingType || !nameCode || area <= 0) return alert('Vui lòng điền đầy đủ thông tin!');
+
+      const fitoutRate = fitoutCost / area;
+      const furRate = furCost / area;
+
+      projects[buildingType].push({
+        name: nameCode,
+        code: nameCode.split('-')[1] || '',
+        area,
+        contractValue,
+        fitoutCost,
+        furCost,
+        fitoutRate: fitoutRate.toFixed(1),
+        furRate: furRate.toFixed(1)
+      });
+
+      localStorage.setItem('projects', JSON.stringify(projects));
+      displayProjects();
+      clearForm();
+    }
+
+    function deleteProject(buildingType, index) {
+      projects[buildingType].splice(index, 1);
+      localStorage.setItem('projects', JSON.stringify(projects));
+      displayProjects();
+    }
+
+    function displayProjects() {
+      const list = document.getElementById('projectList');
+      list.innerHTML = '';
+      const filter = document.getElementById('filterType').value;
+      for (const type in projects) {
+        if (!filter || filter === type) {
+          projects[type].forEach((project, index) => {
+            const item = document.createElement('div');
+            item.className = 'project-item';
+            item.innerHTML = `<strong>${type.toUpperCase()} - ${project.name}</strong> (${project.code}) - ${project.area}m²<br>
+              HĐTC: ${project.contractValue}tr | Fitout: ${project.fitoutCost}tr (${project.fitoutRate}tr/m²) | Fur: ${project.furCost}tr (${project.furRate}tr/m²)
+              <button class="delete-btn" onclick="deleteProject('${type}', ${index})">X</button>`;
+            list.appendChild(item);
+          });
+        }
+      }
+    }
+
+    function clearForm() {
+      document.getElementById('newNameCode').value = '';
+      document.getElementById('newArea').value = '';
+      document.getElementById('newContractValue').value = '';
+      document.getElementById('newFitoutCost').value = '';
+      document.getElementById('newFurCost').value = '';
+    }
+
+    function exportData() {
+      const dataStr = JSON.stringify(projects, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'project-data.json';
+      link.click();
+    }
+
+    displayProjects();
+  </script>
+</body>
+</html>
