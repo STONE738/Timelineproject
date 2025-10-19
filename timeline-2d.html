@@ -3,49 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Timeline 2D</title>
+  <title>Thời Gian TK 2D</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    body {
-      -webkit-user-select: none; /* Safari */
-      -ms-user-select: none; /* IE 10+ */
-      user-select: none; /* Standard syntax */
-    }
-    .sum, .footer-note, label {
-      -webkit-user-select: none; /* Safari */
-      -ms-user-select: none; /* IE 10+ */
-      user-select: none; /* Standard syntax */
-    }
-    .energy {
-      margin-top: 12px;
-      font-weight: 600;
-      font-size: 16px;
-    }
+    body { user-select: none; }
+    .sum, .footer-note, label { user-select: none; }
+    .energy { margin-top: 12px; font-weight: 600; font-size: 16px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Thời Gian Khai Triển 2D</h1>
+    <h1>Thời Gian TK 2D</h1>
     <div class="card">
       <div class="kpi" style="grid-template-columns: repeat(1, minmax(0, 1fr));">
-        <div class="item">
-          <label>Tổng diện tích</label>
-          <div class="sum" id="totalAreaDisplay">0 m²</div>
-        </div>
+        <div class="item"><label>Tổng diện tích</label><div class="sum" id="totalAreaDisplay">0 m²</div></div>
       </div>
       <div class="kpi" style="grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 12px;">
-        <div class="item small-item">
-          <label>Thời gian Fitout (ngày)</label>
-          <div class="sum" id="fitoutTimeDisplay">0 ngày</div>
-        </div>
-        <div class="item small-item">
-          <label>Thời gian Fur (ngày)</label>
-          <div class="sum" id="furTimeDisplay">0 ngày</div>
-        </div>
-        <div class="item">
-          <label>Thời gian tổng (ngày)</label>
-          <div class="sum" id="totalTimeDisplay">0 ngày</div>
-        </div>
+        <div class="item small-item"><label>Thời gian TK Fitout</label><div class="sum" id="fitoutTimeDisplay">0 ngày</div></div>
+        <div class="item small-item"><label>Thời gian TK Furniture</label><div class="sum" id="furTimeDisplay">0 ngày</div></div>
+        <div class="item"><label>Tổng thời gian</label><div class="sum" id="totalTimeDisplay">0 ngày</div></div>
       </div>
       <div class="energy" id="energyDisplay">Năng lượng: 0 (1-5)</div>
       <p class="footer-note">Tỉ lệ: Fitout 22m²/ngày, Fur 18m²/ngày.</p>
@@ -53,44 +29,54 @@
   </div>
 
   <script>
-    let data = {
-      totalArea: 0,
-      buildingType: '',
-      designStyle: '',
-      scopeFitout: false,
-      scopeFur: false,
-      wcCount: 0,
-      staircase: false,
-      bedroomCount: 0
+    let data = { totalArea: 0, buildingType: '', designStyle: '', scopeFitout: false, scopeFur: false, wcCount: 0, bedroomCount: 0, floorNumber: 1 };
+
+    const constructionRates = {
+      canho: { hiendai: 1.0, bancodien: 1.3, luxury: 1.45, minimalism: 0.9, indochine: 1.2, codienchauau: 1.3, khac: 1.05 },
+      nhapho: { hiendai: 1.0, bancodien: 1.3, luxury: 1.45, minimalism: 0.9, indochine: 1.2, codienchauau: 1.3, khac: 1.05 },
+      bietthu: { hiendai: 1.0, bancodien: 1.3, luxury: 1.45, minimalism: 0.9, indochine: 1.2, codienchauau: 1.3, khac: 1.05 },
+      dichvu: { hiendai: 1.0, bancodien: 1.3, luxury: 1.45, minimalism: 0.9, indochine: 1.2, codienchauau: 1.3, khac: 1.05 },
+      shophouse: { hiendai: 1.0, bancodien: 1.3, luxury: 1.45, minimalism: 0.9, indochine: 1.2, codienchauau: 1.3, khac: 1.05 },
+      vanphong: { hiendai: 0.85, bancodien: 1.3 * 0.85, luxury: 1.45 * 0.85, minimalism: 0.9 * 0.85, indochine: 1.2 * 0.85, codienchauau: 1.3 * 0.85, khac: 1.05 * 0.85 }
     };
 
     function updateCalculations() {
-      const totalArea = data.totalArea;
+      const { totalArea = 0, buildingType = 'canho', designStyle = 'hiendai', scopeFitout = false, scopeFur = false, wcCount = 0, bedroomCount = 0, floorNumber = 1 } = data;
+      const isCanho = buildingType === 'canho';
+      const isVanphong = buildingType === 'vanphong';
+      const floors = isVanphong ? 1 : floorNumber;
 
-      let fitoutTime = 0;
-      if (data.scopeFitout) {
-        fitoutTime = totalArea / 22 + data.wcCount * 0.4 + (data.staircase ? 1 : 0);
+      let fitoutTime = scopeFitout ? totalArea / 22 + wcCount * 0.4 : 0;
+      let furTime = scopeFur ? totalArea / 18 + bedroomCount * 1 : 0;
+      let baseTime = fitoutTime + furTime;
+
+      const rateMultiplier = constructionRates[buildingType]?.[designStyle] || 1.0;
+      baseTime = baseTime * rateMultiplier;
+
+      if (isCanho && floors === 1 && totalArea > 100) {
+        const timeFor100 = (100 / 22 * (scopeFitout ? 1 : 0)) + (100 / 18 * (scopeFur ? 1 : 0));
+        const excessFitout = ((totalArea - 100) / 22 * 0.7 * (scopeFitout ? 1 : 0));
+        const excessFur = ((totalArea - 100) / 18 * 0.7 * (scopeFur ? 1 : 0));
+        baseTime = (timeFor100 + excessFitout + excessFur) * rateMultiplier;
+      } else if (floors > 1) {
+        const perFloor = baseTime / floors;
+        baseTime = perFloor + (floors - 1) * perFloor * 0.7;
       }
 
-      let furTime = 0;
-      if (data.scopeFur) {
-        furTime = totalArea / 18 + data.bedroomCount * 1;
+      if (fitoutTime + furTime > 0) {
+        fitoutTime = baseTime * (fitoutTime / (fitoutTime + furTime));
+        furTime = baseTime * (furTime / (fitoutTime + furTime));
       }
-
-      const totalTime = (fitoutTime + furTime);
 
       document.getElementById('totalAreaDisplay').textContent = `${totalArea.toFixed(2)} m²`;
-      document.getElementById('fitoutTimeDisplay').textContent = fitoutTime > 0 ? `${Math.round(fitoutTime)} ngày` : "0 ngày";
-      document.getElementById('furTimeDisplay').textContent = furTime > 0 ? `${Math.round(furTime)} ngày` : "0 ngày";
-      document.getElementById('totalTimeDisplay').textContent = totalTime > 0 ? `${Math.round(totalTime)} ngày` : "0 ngày";
-
-      // Tính năng lượng dựa trên tổng thời gian (càng dài, càng cao, từ 1-5)
-      const energyLevel = totalTime > 0 ? Math.min(5, Math.max(1, Math.round(totalTime / 10))) : 0;
-      document.getElementById('energyDisplay').textContent = `Năng lượng: ${energyLevel} (1-5)`;
+      document.getElementById('fitoutTimeDisplay').textContent = fitoutTime > 0 ? `${Math.round(fitoutTime)} ngày` : '0 ngày';
+      document.getElementById('furTimeDisplay').textContent = furTime > 0 ? `${Math.round(furTime)} ngày` : '0 ngày';
+      document.getElementById('totalTimeDisplay').textContent = baseTime > 0 ? `${Math.round(baseTime)} ngày` : '0 ngày';
+      document.getElementById('energyDisplay').textContent = `Năng lượng: ${baseTime > 0 ? Math.min(5, Math.max(1, Math.round(baseTime / 10))) : 0} (1-5)`;
     }
 
     window.addEventListener('message', (event) => {
-      data = event.data;
+      data = event.data || {};
       updateCalculations();
     });
 

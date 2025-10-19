@@ -88,7 +88,9 @@
       cursor: pointer;
       border-radius: 4px;
     }
-	
+    .tab-btn.active {
+      background: #007bff;
+      color: white;
     }
     iframe {
       width: 100%;
@@ -117,13 +119,14 @@
       }
       .contract-value span {
         font-size: 12px;
+        color: #666; /* Màu chữ xám để rõ ràng */
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Timeline Triển khai</h1>
+    <h1>Nhập thông tin dự án</h1>
     <div class="card">
       <div class="row">
         <div class="field">
@@ -155,6 +158,12 @@
         </div>
       </div>
       <div class="row">
+        <div class="field">
+          <label>Số tầng</label>
+          <input type="number" id="floorNumber" min="1" value="1">
+        </div>
+      </div>
+      <div class="row">
         <div class="field full-width">
           <label>Phạm vi công việc</label>
           <div class="scope-section">
@@ -162,7 +171,7 @@
               <label class="scope-label"><input type="checkbox" id="scopeFitout"> Fitout</label>
               <div class="scope-details">
                 <label class="scope-detail"><span class="label-text">Số lượng WC</span><input type="number" id="wcCount" min="0" value="0"></label>
-            </div>
+              </div>
             </div>
             <div class="scope-item">
               <label class="scope-label"><input type="checkbox" id="scopeFur"> Fur</label>
@@ -189,7 +198,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Loai thi cong</label>
+          <label>Loại thi công</label>
           <select id="constructionType">
             <option value="new">Làm mới</option>
             <option value="renovation">Cải tạo</option>
@@ -199,8 +208,8 @@
     </div>
 
     <div class="tabs" role="tablist">
-      <div class="tab-btn active" data-src="timeline-2d.html" role="tab">Timeline 2D</div>
-      <div class="tab-btn" data-src="timeline-construction.html" role="tab">Timeline Thi công</div>
+      <div class="tab-btn active" data-src="timeline-2d.html" role="tab">Thời Gian TK 2D</div>
+      <div class="tab-btn" data-src="timeline-construction.html" role="tab">Thời Gian Thi công</div>
       <div class="tab-btn" data-src="project-data.html" role="tab">Dữ liệu dự án</div>
     </div>
 
@@ -225,7 +234,8 @@
         bedroomCount: parseInt(document.getElementById('bedroomCount').value) || 0,
         fitoutContractValue: parseFloat(document.getElementById('fitoutContractValue').value) || 0,
         furContractValue: parseFloat(document.getElementById('furContractValue').value) || 0,
-        constructionType: document.getElementById('constructionType').value
+        constructionType: document.getElementById('constructionType').value,
+        floorNumber: parseInt(document.getElementById('floorNumber').value) || 1
       };
     }
 
@@ -244,6 +254,21 @@
       }
       updateContractValues();
     }
+
+    const buildingTypeSelect = document.getElementById('buildingType');
+    const floorInput = document.getElementById('floorNumber');
+    function toggleFloorInput() {
+      if (buildingTypeSelect.value === 'canho') {
+        floorInput.disabled = true;
+        floorInput.value = 1;
+      } else {
+        floorInput.disabled = false;
+      }
+      sendData();
+    }
+
+    buildingTypeSelect.addEventListener('change', toggleFloorInput);
+    toggleFloorInput(); // Gọi ngay để áp dụng mặc định
 
     tabs.forEach(tab => tab.addEventListener('click', () => {
       tabs.forEach(t => t.classList.remove('active'));
